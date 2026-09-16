@@ -1,0 +1,498 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Charlotte’s Basketball World — Game 1</title><style>body{font:16px system-ui;margin:auto;max-width:850px;padding:12px;background:#eee8dc;color:#18352d}.hero,.score{background:#123e34;color:#fff;border-radius:18px;padding:16px}.card{background:#fff;border-radius:18px;padding:14px;margin:12px 0}.score{display:flex;justify-content:space-between;font-size:24px}.score small{display:block;font-size:10px}.scene{background:#fbf7ef;border-radius:14px;padding:18px;min-height:150px;line-height:1.5}.choice{display:block;width:100%;padding:12px;margin:6px 0;border:0;border-radius:12px;background:#17483c;color:#fff;font-weight:700;text-align:left}.orange{background:#e77b36}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:6px 8px;background:#f7f3eb;border-radius:99px;font-size:11px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.stat{padding:8px;background:#f7f3eb;border-radius:10px}.stat small{display:block;font-size:8px}.qa,.trace{background:#17251f;color:#dfeae5;padding:10px;border-radius:10px;font:11px monospace;max-height:300px;overflow:auto}.qaHarness{display:none}.qaHarness.on{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}@media(max-width:600px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+.qaOnly{display:none}body.testing .qaOnly{display:block}.scene{white-space:pre-line}button:focus-visible{outline:3px solid #e77b36;outline-offset:2px}.history{font-size:13px;max-height:260px;overflow:auto}.history p{border-bottom:1px solid #ddd;padding-bottom:8px}.muted{font-size:12px}.qaGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+</style></head><body>
+<header class="hero"><b>GAME 1 · ASK FOR IT</b><h1>Charlotte’s Basketball World</h1><div>You’re in the game. Make your move when it matters and see what happens.</div></header>
+<section class="card"><div class="score"><div><small>MAGIC — FALCONS</small><span id="m">0</span> — <span id="f">0</span></div><div><small id="h">1ST HALF</small><span id="c">20:00</span></div></div>
+<div class="chips"><span class="chip">Ball: <b id="ball">dead</b></span><span class="chip">Pressure: <b id="p">low</b></span><span class="chip">Fatigue: <b id="fat">low</b></span><span class="chip">Possession: <b id="pid">—</b></span></div>
+<div id="scene" class="scene" aria-live="polite"></div><div id="choices"></div></section>
+<section class="card stats"><div class="stat"><small>Decisions</small><b id="d">0</b></div><div class="stat"><small>Shots</small><b id="s">0</b></div><div class="stat"><small>Your rebounds</small><b id="r">0</b></div><div class="stat"><small>Your points</small><b id="pts">0</b></div><div class="stat"><small>Your stops</small><b id="st">0</b></div><div class="stat"><small>Team turnovers, both sides</small><b id="to">0</b></div></section>
+<details class="card"><summary>Game recap</summary><div id="history" class="history"></div></details>
+<section class="card qaOnly"><b>Direct QA · Engine 1.4.0 · NOT CERTIFIED</b><p class="muted">Fixtures use the production controls and engine. Entering a fixture resets only this browser session.</p><div id="fixtures" class="qaGrid"></div><button id="contract" class="choice orange">RUN CONTRACT CHECKS</button><pre id="qa"></pre><details><summary>State and complete event trace</summary><pre id="state"></pre><pre id="trace" class="trace"></pre></details></section>
+<script>const VERSION = 'G1-engine-1.4.0';
+const other = team => team === 'Magic' ? 'Falcons' : 'Magic';
+const possessionId = n => 'G1-P' + String(n).padStart(2, '0');
+
+// The engine owns score, clock, ball and possession. Presentation receives copies.
+function createEngine(seed = 314159, rolls = []) {
+  let rng = seed >>> 0, scripted = [...rolls], events = [];
+  let x = { version: VERSION, seed, half: 1, clock: 1200, score: {Magic: 0, Falcons: 0},
+    team: null, pos: 0, phase: 'opening', ball: 'dead', nextTeam: null,
+    decisions: 0, shots: 0, points: 0, rebounds: 0, stops: 0, turnovers: 0,
+    teamRebounds: {Magic: 0, Falcons: 0}, teamTurnovers: {Magic: 0, Falcons: 0},
+    pressure: 'low', fatigue: 'low', attempt: null, freeThrows: null, ended: false,
+    restartTeam: 'Falcons', askedForBall: 0, wentIntoSpace: 0, goodPasses: 0, bravePlays: 0,
+    looseBalls: 0, wentAfterBall: 0, trust: 0, attention: 0, recoveredAfterMistake: 0, mistake: false };
+  const state = () => structuredClone(x);
+  function emit(type, detail = {}) {
+    events.push({id: 'E' + (events.length + 1), type, cause: detail.cause || type.toLowerCase(),
+      playerAction: null, physicalOutcome: null, scoreChange: 0, possessionChange: null,
+      ...detail, stateAfter: state()});
+  }
+  function requirePhase(...phases) {
+    if (x.ended || !phases.includes(x.phase)) throw Error('Invalid action in ' + x.phase);
+  }
+  function random() {
+    const before = rng;
+    rng = (Math.imul(1664525, rng) + 1013904223) >>> 0;
+    const value = scripted.length ? scripted.shift() : rng / 4294967296;
+    if (!(value >= 0 && value < 1)) throw Error('Invalid random input');
+    emit('RANDOM_DRAW', {seedBefore: before, value});
+    return value;
+  }
+  function pressure() {
+    x.pressure = x.clock <= 120 ? 'late' : x.clock <= 480 ? 'high' : x.clock <= 900 ? 'moderate' : 'low';
+    const elapsed = (x.half - 1) * 1200 + 1200 - x.clock;
+    x.fatigue = elapsed >= 1800 ? 'high' : elapsed >= 900 ? 'moderate' : 'low';
+  }
+  function tick(seconds, cause) {
+    requirePhase('live', 'rebound', 'attempt');
+    if (!Number.isInteger(seconds) || seconds < 0 || seconds > 30 || !cause) throw Error('Clock requires a bounded live event');
+    const elapsed = Math.min(seconds, x.clock);
+    x.clock -= elapsed; pressure();
+    emit('CLOCK_TICK', {cause, elapsed});
+  }
+  function begin(team, cause) {
+    if (!['Magic', 'Falcons'].includes(team) || x.ended || !['opening', 'between', 'halftime'].includes(x.phase)) throw Error('Invalid possession start');
+    x.team = team; x.pos++; x.phase = 'live'; x.ball = 'live'; x.nextTeam = null;
+    x.attempt = null;
+    emit('POSSESSION_START', {cause, possessionChange: team, possessionId: possessionId(x.pos)});
+  }
+  function end(cause, nextTeam) {
+    x.phase = 'between'; x.ball = 'dead'; x.nextTeam = nextTeam;
+    emit('POSSESSION_END', {cause, nextTeam, possessionId: possessionId(x.pos)});
+  }
+  function boundary() {
+    if (x.phase === 'halftime' || x.ended) return true;
+    if (x.clock !== 0 || x.phase === 'free_throw') return false;
+    if (x.phase !== 'between') end('period_expired', null);
+    x.restartTeam = x.nextTeam || other(x.team || 'Magic');
+    x.nextTeam = null; x.team = null;
+    if (x.half === 1) { x.phase = 'halftime'; x.ball = 'dead'; emit('HALFTIME'); }
+    else { x.phase = 'final'; x.ball = 'ended'; x.ended = true; emit('FINAL_WHISTLE', {finalScore: {...x.score}}); }
+    return true;
+  }
+  function advance() {
+    requirePhase('between');
+    if (!boundary()) begin(x.nextTeam, 'resolved_possession');
+  }
+  function decision(choices, chosen, type, id) {
+    requirePhase('live', 'rebound', 'attempt');
+    if ((type === 'shooting' ? choices.length !== 4 : choices.length !== 3) || !choices.includes(chosen)) throw Error('Choice contract');
+    x.decisions++;
+    emit('DECISION', {playerAction: chosen, decisionType: type, decisionId: id,
+      choiceId: id + '-C' + (choices.indexOf(chosen) + 1), choices: [...choices]});
+  }
+  function prepareShot(value, shooter = 'teammate') {
+    requirePhase('live');
+    if (![2, 3].includes(value) || !['you', 'teammate', 'opponent'].includes(shooter)) throw Error('Attempt contract');
+    if ((shooter === 'opponent') !== (x.team === 'Falcons')) throw Error('Shooter ownership');
+    x.attempt = {team: x.team, shooter, value}; x.phase = 'attempt';
+    if (shooter === 'you') x.shots++;
+    emit('ATTEMPT_ESTABLISHED', {team: x.team, shotValue: value, shooter,
+      physicalOutcome: value === 3 ? 'three_point_attempt' : 'two_point_attempt'});
+  }
+  function score(team, value, type, detail) {
+    x.score[team] += value;
+    if (detail.shooter === 'you') x.points += value;
+    emit(type, {...detail, team, scoreChange: value});
+  }
+  function resolveShot({make = .40, block = .08, foul = .12} = {}) {
+    requirePhase('attempt');
+    if ([make, block, foul].some(v => v < 0) || make + block + foul > 1) throw Error('Shot probabilities');
+    const a = {...x.attempt}, r = random();
+    const outcome = r < make ? 'made' : r < make + block ? 'blocked' : r < make + block + foul ? 'foul' : 'miss';
+    emit('SHOT_OUTCOME', {...a, shotValue: a.value, physicalOutcome: outcome});
+    if (outcome === 'made') {
+      score(a.team, a.value, 'MADE_BASKET', {...a, physicalOutcome: 'made_basket'});
+      end('made_basket', other(a.team));
+    } else if (outcome === 'foul') {
+      x.phase = 'free_throw'; x.ball = 'free_throw';
+      x.freeThrows = {team: a.team, shooter: a.shooter, total: 2, next: 1};
+      emit('SHOOTING_FOUL', {freeThrows: 2, team: a.team});
+    } else {
+      x.phase = 'rebound'; x.ball = 'live';
+      emit(outcome === 'miss' ? 'SHOT_MISS' : 'SHOT_BLOCK', {team: a.team, physicalOutcome: outcome});
+    }
+    return {...a, outcome};
+  }
+  function rebound(actionIndex) {
+    requirePhase('rebound');
+    if (![0, 1, 2].includes(actionIndex)) throw Error('Rebound action');
+    if (x.clock === 0) { boundary(); return {expired: true}; }
+    const offense = x.team, r = random();
+    // Positioning changes chances; no button selects the winner.
+    const you = offense === 'Magic' ? [.22, .04, .08][actionIndex] : [.40, .18, .24][actionIndex];
+    const teammate = offense === 'Magic' ? [.16, .20, .28][actionIndex] : [.35, .48, .46][actionIndex];
+    const winner = r < you ? 'you' : r < you + teammate ? 'teammate' : 'opponent';
+    const team = winner === 'opponent' ? 'Falcons' : 'Magic';
+    if (actionIndex === 0) x.wentAfterBall++;
+    if (winner === 'you') { x.rebounds++; x.looseBalls++; }
+    x.teamRebounds[team]++;
+    x.phase = 'live'; x.attempt = null;
+    emit('REBOUND_OUTCOME', {winner, team, physicalOutcome: winner + '_rebound', offensive: team === offense});
+    if (team === offense) emit('SECOND_CHANCE', {team, physicalOutcome: 'offense_retains_ball'});
+    else end('defensive_rebound', team);
+    return {winner, team, offensive: team === offense};
+  }
+  function freeThrow(makeChance = .65) {
+    requirePhase('free_throw');
+    const f = {...x.freeThrows}, made = random() < makeChance;
+    if (made) score(f.team, 1, 'FREE_THROW_MADE', {...f, index: f.next, physicalOutcome: 'made_free_throw'});
+    else emit('FREE_THROW_MISSED', {...f, index: f.next, physicalOutcome: 'missed_free_throw'});
+    x.freeThrows.next++;
+    if (f.next === f.total) {
+      x.freeThrows = null;
+      if (made) end('last_free_throw_made', other(f.team));
+      else { x.phase = 'rebound'; x.ball = 'live'; emit('LIVE_BALL', {cause: 'last_free_throw_missed'}); }
+    }
+    return {made, index: f.next, total: f.total, team: f.team};
+  }
+  function turnover(cause = 'lost_ball', stealBy = null) {
+    requirePhase('live');
+    const team = x.team;
+    x.teamTurnovers[team]++; x.turnovers++;
+    emit('TURNOVER', {team, physicalOutcome: cause});
+    if (team === 'Magic') x.mistake = true;
+    if (stealBy) { if (stealBy === 'you') { x.stops++; if(x.mistake)x.recoveredAfterMistake++; x.mistake=false; } emit('STEAL', {team: other(team), player: stealBy, physicalOutcome: 'steal'}); }
+    end(cause, other(team));
+  }
+  function defend(actionIndex, vulnerable = false) {
+    requirePhase('live');
+    if (x.team !== 'Falcons' || ![0, 1, 2].includes(actionIndex)) throw Error('Defence contract');
+    const chance = vulnerable ? [.65, .80, .45][actionIndex] : [.08, .14, .04][actionIndex];
+    const success = random() < chance;
+    if (success) turnover('defensive_pressure', 'you');
+    else emit('DEFENSIVE_RECOVERY', {physicalOutcome: actionIndex === 1 ? 'dribbler_gets_past' : 'opponent_retains_ball'});
+    return success;
+  }
+  function deadBall(cause = 'out_of_bounds') {
+    requirePhase('live'); x.phase = 'dead_ball'; x.ball = 'dead'; emit('DEAD_BALL', {cause});
+  }
+  function restart() {
+    requirePhase('dead_ball'); x.phase = 'live'; x.ball = 'live'; emit('RESTART', {team: x.team});
+  }
+  function resume() {
+    requirePhase('halftime'); x.half = 2; x.clock = 1200; pressure();
+    begin(x.restartTeam, 'second_half_restart'); emit('SECOND_HALF_START');
+  }
+  function seekBall(index) {
+    requirePhase('live'); if(x.team!=='Magic'||![0,1,2].includes(index))throw Error('Offence contract');
+    if(index===0){x.askedForBall++;x.trust=Math.min(5,x.trust+1);x.attention=Math.min(5,x.attention+1);x.bravePlays++;}
+    if(index===1){x.wentIntoSpace++;x.trust=Math.min(5,x.trust+.5);}
+    const r=random(), receive=[.60+x.trust*.025,.50+x.trust*.025,.18][index];
+    if(index===0&&r>.94){turnover('pass_intercepted');return 'intercepted';}
+    const outcome=r<receive?'received':'teammate_continues';
+    emit('PASS', {physicalOutcome:outcome, playerAction:index});return outcome;
+  }
+  function handleBall(index) {
+    requirePhase('live');if(x.team!=='Magic'||![0,1,2].includes(index))throw Error('Ball handling contract');
+    const r=random();
+    if(r>(index===1?.90:index===2?.78:.92)){turnover('ball_intercepted');return 'turnover';}
+    if(index===0&&r<.72){x.bravePlays++;emit('DRIVE',{physicalOutcome:'scoring_space'});return 'shot';}
+    x.goodPasses++;emit('PASS',{physicalOutcome:'teammate_receives'});return 'pass';
+  }
+  return {state, trace: () => structuredClone(events), decision, tick, random, prepareShot,
+    resolveShot, rebound, freeThrow, turnover, defend, deadBall, restart, advance, boundary, resume, seekBall, handleBall,
+    start() { requirePhase('opening'); begin('Magic', 'opening_tip'); emit('TIP_OFF', {physicalOutcome: 'Magic_win_tip'}); },
+    annotate(type, detail) { emit(type, detail); }};
+}
+
+const NORMAL = ['Call for the ball','Move into the open space','Keep moving and stay ready'];
+const SHOTS = ['Pump fake, then layup','Drive for the layup','Take the shot','Side step and take the shot'];
+const REBOUNDS = ['Go after the ball','Get back to defend','Stay ready for the next play'];
+const DEFENCE = ['Stay in front of them','Move quickly to cut off their path','Protect the basket'];
+const DEF_SHOTS = ['Put your hand up and make the shot difficult','Jump to try to block the shot','Get ready for the rebound'];
+const RECOVERY = ['Get back to defend','Find your player','Move towards the ball'];
+const BALL_HAND = ['Move towards the basket','Pass to the open teammate','Keep the ball and look again'];
+// Authored slot identity is independent from runtime possession identity.
+// Branch-only slots are emitted by the live chain; anchors wait for the correct owner.
+const SPINE = [
+  ['P01',1,1200,'tip'],['P02',1,1176,'normal','Magic'],['P03',1,null,'branch'],
+  ['P04',1,1080,'defence','Falcons'],['P05',1,990,'background','Magic'],
+  ['P06',1,945,'normal','Magic'],['P07',1,null,'branch'],['P08',1,870,'defence','Falcons'],
+  ['P09',1,810,'shooting','Magic'],['P10',1,null,'branch'],['P11',1,null,'branch'],
+  ['P12',1,690,'defence','Falcons'],['P13',1,570,'normal','Magic'],['P14',1,null,'branch'],
+  ['P15',1,450,'recovery','Falcons'],['P16',1,330,'normal','Magic'],['P17',1,150,'normal','Magic'],
+  ['P18',1,0,'halftime'],['P19',2,1200,'restart'],['P20',2,1170,'normal','Magic'],
+  ['P21',2,null,'branch'],['P22',2,960,'shooting','Magic'],['P23',2,900,'defence','Falcons'],
+  ['P24',2,720,'normal','Magic'],['P25',2,540,'event'],['P26',2,360,'normal','Magic'],
+  ['P27',2,240,'normal','Magic'],['P28',2,120,'late'],['P29',2,30,'final_play'],['P30',2,0,'final']
+].map(([id,half,clock,kind,team])=>({id,half,clock,kind,team}));
+const fmt = clock => String(Math.floor(clock / 60)).padStart(2,'0') + ':' + String(clock % 60).padStart(2,'0');
+function shotText(result) {
+  const who = result.shooter === 'you' ? 'Your' : result.team === 'Magic' ? 'Your teammate’s' : 'The Falcons’';
+  const shot = result.value === 3 ? 'three-point shot' : 'shot';
+  if (result.outcome === 'made') return `${who} ${shot} is good! ${result.value} points for ${result.team}.`;
+  if (result.outcome === 'foul') return `${who} ${shot} draws a shooting foul. No basket. Two free throws for ${result.team}.`;
+  return `${who} ${shot} ${result.outcome === 'blocked' ? 'is blocked' : 'misses'}. No points. The ball is live.`;
+}
+function reboundText(r) {
+  if(r.expired) return 'The horn sounds before anyone can collect the rebound.';
+  const who = r.winner === 'you' ? 'You win the rebound.' : r.winner === 'teammate' ? 'Your teammate wins the rebound.' : 'The Falcons win the rebound.';
+  return `${who} ${r.offensive ? r.team + ' keep the same possession for a second chance.' : r.team + ' have the ball next.'}`;
+}
+function freeThrowText(f) {
+  return `${f.index === 1 ? 'First' : 'Second'} free throw for ${f.team}: ${f.made ? 'good! One point.' : 'missed. No point.'}`;
+}
+
+function runContracts() {
+  const results=[];
+  function check(name,run){try{run();results.push({name,pass:true});}catch(e){results.push({name,pass:false,error:e.message});}}
+  const ok=(v,msg)=>{if(!v)throw Error(msg||'contract failed');};
+  check('Locked choices',()=>{
+    ok([NORMAL,REBOUNDS,DEFENCE,DEF_SHOTS].every(c=>c.length===3));
+    ok(JSON.stringify(SHOTS)===JSON.stringify(['Pump fake, then layup','Drive for the layup','Take the shot','Side step and take the shot']));
+  });
+  check('Explicit opening tip at 20:00 and 0–0',()=>{const e=createEngine();e.start();ok(e.state().clock===1200&&e.state().score.Magic===0&&e.trace().at(-1).physicalOutcome==='Magic_win_tip');});
+  check('Opponent scoring persists after transition',()=>{const e=createEngine(1,[0]);e.start();e.turnover();e.advance();e.prepareShot(2,'opponent');e.resolveShot();e.advance();ok(e.state().score.Falcons===2);});
+  for(const team of ['Magic','Falcons'])check(team+' offensive rebound retains ID',()=>{
+    const e=createEngine(1,[.99,team==='Magic'?.01:.99]);e.start();if(team==='Falcons'){e.turnover();e.advance();}
+    e.prepareShot(2,team==='Magic'?'you':'opponent');e.resolveShot();const p=e.state().pos;e.rebound(0);
+    ok(e.state().pos===p&&e.state().team===team&&e.state().phase==='live');
+  });
+  check('Rebound action does not select winner',()=>{
+    const winners=new Set();for(const r of [.01,.3,.99]){const e=createEngine(1,[.99,r]);e.start();e.prepareShot(2,'you');e.resolveShot();winners.add(e.rebound(0).winner);}ok(winners.size===3);
+  });
+  check('Free throws individually score; final miss stays live',()=>{
+    const e=createEngine(1,[.52,.01,.99]);e.start();e.prepareShot(2,'you');e.resolveShot();const a=e.freeThrow(),b=e.freeThrow();ok(a.made&&!b.made&&e.state().score.Magic===1&&e.state().phase==='rebound');
+  });
+  check('Steal records opponent turnover',()=>{const e=createEngine(1,[0]);e.start();e.turnover();e.advance();e.defend(1,true);e.advance();ok(e.state().team==='Magic'&&e.state().teamTurnovers.Falcons===1);});
+  check('Clock rejects giant jumps',()=>{const e=createEngine();e.start();let rejected=false;try{e.tick(1200,'skip');}catch{rejected=true;}ok(rejected);});
+  check('Halftime and final only after full clock',()=>{
+    const e=createEngine();e.start();for(let i=0;i<40;i++)e.tick(30,'contract_live_play');e.boundary();ok(e.state().phase==='halftime');e.resume();ok(e.state().team==='Falcons'&&e.state().clock===1200);for(let i=0;i<40;i++)e.tick(30,'contract_live_play');e.boundary();ok(e.state().ended);
+  });
+  check('No actions after final whistle',()=>{
+    const e=createEngine();e.start();for(let h=0;h<2;h++){for(let i=0;i<40;i++)e.tick(30,'contract_live_play');e.boundary();if(h===0)e.resume();}let rejected=false;try{e.turnover();}catch{rejected=true;}ok(rejected);
+  });
+  return results;
+}
+
+
+function createGame({seed=1, rolls=[], fixture=null}={}) {
+  const e=createEngine(seed,rolls); let screen, revision=0, actions=[], anchor=1, currentSlot='P01',
+    spotlight=false, chainDecisions=0, vulnerable=false, recovered=false, sinceDecision=0;
+  const state=()=>e.state();
+  function show(text, buttons=[],kind='result', extra={}) {
+    revision++; actions=buttons.map(b=>b[1]);
+    screen={revision,text,kind,choices:buttons.map(b=>b[0]),state:state(),slot:currentSlot,...extra};
+    return screen;
+  }
+  function result(text,next=route){return show(text,[['Continue',next]]);}
+  function mark(id){currentSlot=id;e.annotate('AUTHORED_SLOT',{slot:id});}
+  function decision(text,choices,handler,type='normal'){
+    return show(text,choices.map((label,i)=>[label,()=>{
+      e.decision(choices,label,type,currentSlot+'-'+possessionId(state().pos)+'-D'+(state().decisions+1));
+      chainDecisions++;sinceDecision=0;return handler(i);
+    }]),type==='shooting'?'shooting':'decision');
+  }
+  function tick(n,cause){e.tick(n,cause);sinceDecision+=n;}
+  function terminal(prefix=''){
+    const x=state();
+    if(x.phase==='halftime'){
+      mark('P18');return show(prefix+` Halftime. Magic ${x.score.Magic} — Falcons ${x.score.Falcons}. The first 20 minutes are complete.`,[['RESUME SECOND HALF',()=>{
+        e.resume();mark('P19');anchor=19;
+        return result(`Second half, 20:00. ${state().team} have the restart. ${state().team==='Magic'?'Your teammate receives the inbound pass. You run forward into space.':'The Falcons inbound. You find your player and get ready to defend.'}`);
+      }]],'halftime');
+    }
+    if(x.ended){mark('P30');const m=x.score.Magic,f=x.score.Falcons;return show(prefix+` Final whistle. Magic ${m} — Falcons ${f}. ${m===f?'The game finishes tied.':m>f?'Magic win!':'Falcons win.'} You were in the game.`,[],'final');}
+    return null;
+  }
+  function finishOutcome(text){
+    if(state().clock===0&&state().phase!=='free_throw'){e.boundary();return terminal(text);}
+    return result(text);
+  }
+  function shotResult(model){
+    tick(2,'shot_in_flight');const r=e.resolveShot(model);const text=shotText(r);
+    if(state().clock===0&&r.outcome!=='foul'){e.boundary();return terminal(text);}
+    if(r.outcome==='foul'){mark('P10');return freeThrows(text);}
+    if(r.outcome==='miss'||r.outcome==='blocked')return reboundScene(text);
+    return finishOutcome(text+` ${state().nextTeam} will inbound.`);
+  }
+  function shooting(prefix='You receive in a genuine scoring position.'){
+    spotlight=true;
+    return decision(prefix+' You are inside the three-point line. Which shot will you try?',SHOTS,i=>{
+      e.prepareShot(2,'you');
+      const attention=state().attention*.008;
+      return shotResult({make:[.46,.42,.36,.38][i]-attention,block:[.05,.09,.06,.04][i],foul:i<2?.16:.07});
+    },'shooting');
+  }
+  function freeThrows(prefix=''){
+    const f=state().freeThrows;
+    return show(prefix,[[(f.next===1?'First':'Second')+' free throw',()=>{
+      const r=e.freeThrow(); const text=freeThrowText(r);
+      if(state().phase==='free_throw')return freeThrows(text);
+      if(state().clock===0){e.boundary();return terminal(text);}
+      if(state().phase==='rebound')return reboundScene(text+' The final miss is live.');
+      return finishOutcome(text+` ${state().nextTeam} will inbound.`);
+    }]],'free_throw');
+  }
+  function reboundScene(prefix){
+    if(spotlight && state().decisions<18 && chainDecisions<4){
+      return decision(prefix+' The rebound is within reach. What do you do?',REBOUNDS,i=>{
+        tick(2,'rebound_contest');const r=e.rebound(i),text=reboundText(r);
+        if(r.expired)return terminal(text);
+        if(r.offensive&&r.winner==='you'&&state().decisions<18){mark('P11');return shooting(text+' You turn towards the basket.');}
+        if(r.offensive&&r.team==='Falcons')return result(text+' You recover towards the basket.',()=>{
+          if(state().decisions<18&&chainDecisions<4)return defensiveShot('The Falcons try again from close range.');
+          return background();
+        });
+        return finishOutcome(text);
+      });
+    }
+    tick(Math.min(2,state().clock),'rebound_contest');return finishOutcome(prefix+' '+reboundText(e.rebound(2)));
+  }
+  function normal(prefix='Your teammate has the ball. You see open space.'){
+    return decision(prefix+' What do you do?',NORMAL,i=>{
+      tick(5,'off_ball_movement');if(state().clock===0){e.boundary();return terminal('The horn sounds as the ball moves across court.');}
+      const outcome=e.seekBall(i);
+      if(outcome==='intercepted')return finishOutcome('The defender intercepts the pass meant for you. Falcons ball next. You turn to recover.');
+      if(outcome==='received'&&state().decisions<17&&chainDecisions<2){mark(state().half===1?'P03':'P21');return ballHand();}
+      return teammateShot(outcome==='received'?'You receive and move the pass on. A teammate has space.':i===1?'You run into space and draw the defender. Your teammate has a shot.':'The ball moves to a teammate, who finds room to shoot.');
+    });
+  }
+  function ballHand(){
+    return decision('You catch the pass. A defender moves towards you. What do you do?',BALL_HAND,i=>{
+      tick(4,'ball_handling');if(state().clock===0){e.boundary();return terminal('The half ends before a shot can be released.');}
+      const outcome=e.handleBall(i);
+      if(outcome==='turnover')return finishOutcome('The defender gets to the ball. Falcons take over. You turn and run back.');
+      if(outcome==='shot'&&state().decisions<18)return shooting('You get past the defender and reach shooting space.');
+      return teammateShot('You pass out. Your teammate receives and prepares to shoot.');
+    });
+  }
+  function teammateShot(prefix){
+    e.prepareShot(2,'teammate');return result(prefix+' They are going for two.',()=>shotResult({make:.38,block:.06,foul:.06}));
+  }
+  function defence(prefix='The Falcons bring the ball towards you.',isVulnerable=false){
+    vulnerable=isVulnerable;
+    return decision(prefix+(vulnerable?' The dribbler pushes the ball too far ahead. You have a chance to pressure the ball.':' The ball handler drives towards the basket.'),DEFENCE,i=>{
+      tick(4,'defensive_pressure');
+      if(state().clock===0){e.boundary();return terminal('The horn sounds before the Falcons can shoot.');}
+      if(e.defend(i,vulnerable))return finishOutcome('You get a hand to the ball and steal it! Falcons turnover. Magic ball next.');
+      return defensiveShot(i===1?'The dribbler gets past your first step. You recover as they prepare to shoot.':'You stay in the play. The Falcons prepare to shoot.');
+    });
+  }
+  function defensiveShot(prefix='The Falcons prepare to shoot.',value=2){
+    e.prepareShot(value,'opponent');
+    const text=prefix+(value===3?' They are beyond the arc, going for three.':' They are close to the basket, going for two.');
+    if(state().decisions>=18||chainDecisions>=3)return result(text,()=>shotResult({make:.38,block:.06,foul:.06}));
+    return decision(text,DEF_SHOTS,i=>shotResult({make:[.32,.36,.43][i],block:[.05,.17,.01][i],foul:[.06,.12,.02][i]}));
+  }
+  function recovery(){return decision('The Falcons have the ball and you are behind the play. How do you recover?',RECOVERY,i=>{
+    tick(5,'defensive_recovery');if(state().clock===0){e.boundary();return terminal('The half ends as you recover.');}
+    if(e.defend(i,true))return finishOutcome('You get back into position and take the loose ball. Falcons turnover. Magic have possession next.');
+    return defensiveShot('You find your player. The Falcons move the ball and prepare to shoot.');
+  });}
+  function background(){
+    spotlight=false;const x=state();
+    if(x.phase==='between'){e.advance();if(state().phase==='halftime'||state().ended)return terminal();}
+    if(state().phase==='rebound')return reboundScene('The ball is still live after the miss.');
+    if(state().phase==='free_throw')return freeThrows();
+    if(state().phase!=='live')throw Error('Unexpected background phase '+state().phase);
+    const owner=state().team, pid=possessionId(state().pos), duration=8+Math.floor(e.random()*16);
+    tick(duration,'background_ball_movement');
+    if(state().clock===0){e.boundary();return terminal(`${owner} move the ball, but cannot release a shot before the horn.`);}
+    const event=e.random();
+    if(event<.20){e.turnover('pass_intercepted','teammate');return finishOutcome(`${owner} move the ball up court. A defender intercepts the next pass. ${state().nextTeam} have the ball next.`);}
+    if(event>.97&&!recovered){recovered=true;e.deadBall();return show(`${owner} attack. A defender knocks the ball out. ${owner} keep the inbound.`,[['Inbound the ball',()=>{e.restart();return result(`${owner} complete the inbound. The same possession continues.`);}]],'dead_ball');}
+    recovered=false;
+    const value=event>.87?3:2;
+    e.prepareShot(value,owner==='Magic'?'teammate':'opponent');
+    const trailing=state().score[owner]<state().score[owner==='Magic'?'Falcons':'Magic'];
+    return result(`${pid}: ${owner==='Magic'?'Your teammates move the ball. A teammate':'The Falcons work a pass into space. Their player'} ${value===3?'sets up beyond the arc for a three-point attempt.':'finds room near the basket for a two-point attempt.'}`,()=>shotResult({make:trailing?.44:.32,block:.05,foul:.035}));
+  }
+  function budgetFor(a){
+    const d=state().decisions;
+    if(a.kind==='shooting')return d<(a.half===1?10:15);
+    if(a.kind==='late'||a.kind==='final_play')return d<18;
+    if(a.id==='P04')return d<7;
+    if(a.id==='P15')return d<10;
+    if(a.id==='P20')return d<12;
+    if(a.id==='P24'||a.id==='P26'||a.id==='P27')return d<12;
+    return d<(a.half===1?5:12);
+  }
+  function route(){
+    let x=state();
+    if(x.phase==='between'){e.advance();x=state();}
+    if(x.phase==='halftime'||x.ended)return terminal();
+    if(x.phase==='rebound')return reboundScene('The missed shot is still live.');
+    if(x.phase==='free_throw')return freeThrows();
+    // Every retained possession is resolved before selecting a new authored anchor.
+    if(x.phase!=='live')throw Error('Unexpected route '+x.phase);
+    while(anchor<SPINE.length){
+      const a=SPINE[anchor];
+      if(a.kind==='branch'||a.half<x.half){anchor++;continue;}
+      if(a.half>x.half||x.clock>a.clock)return background();
+      if(['halftime','final'].includes(a.kind))return background();
+      let wanted=a.team;
+      if(a.kind==='late')wanted=x.score.Magic>x.score.Falcons?'Falcons':x.score.Magic<x.score.Falcons?'Magic':x.team;
+      if(wanted&&x.team!==wanted)return background();
+      anchor++;mark(a.id);spotlight=true;chainDecisions=0;
+      if(a.kind==='background'||a.kind==='restart')return background();
+      if(a.kind==='event'){e.annotate('STATE_MEMORY',{trust:x.trust,attention:x.attention});return background();}
+      if(!budgetFor(a))return background();
+      if(a.kind==='normal')return normal(x.half===2&&x.trust>1?'Your teammate looks towards you again. The defender is watching your movement.':undefined);
+      if(a.kind==='shooting')return shooting();
+      if(a.kind==='defence')return defence(undefined,a.id==='P04'||a.id==='P23');
+      if(a.kind==='recovery')return recovery();
+      if(a.kind==='late'||a.kind==='final_play')return x.team==='Magic'?shooting('The score is on the board. Your teammate finds you with room to shoot.'):defence('The Falcons have possession with the clock running down.',true);
+    }
+    return background();
+  }
+  function start(){e.start();mark('P01');return result('Your teammate wins the opening tip! Magic have the ball. You run forward while your teammates spread out.',()=>{
+    tick(24,'opening_advance');spotlight=true;chainDecisions=0;mark('P02');anchor=2;return normal();
+  });}
+  function enter(mode){
+    e.start();mark('QA-'+mode);spotlight=true;chainDecisions=0;anchor=2;
+    if(['defence','steal','failed_steal','defshot','defthree','defreb','opponent_rebound','turnover','recovery'].includes(mode)){e.turnover();e.advance();}
+    if(mode==='normal')return normal();
+    if(mode==='ball_hand')return ballHand();
+    if(['shots','miss','block','foul','made','late'].includes(mode)){
+      if(mode==='late'){for(let i=0;i<37;i++)tick(30,'qa_setup');}
+      return shooting();
+    }
+    if(['offreb','defreb','opponent_rebound','teammate_rebound'].includes(mode)){
+      e.prepareShot(2,state().team==='Magic'?'you':'opponent');e.resolveShot();return reboundScene('The shot misses. The ball is live.');
+    }
+    if(mode==='ft'){e.prepareShot(2,'you');e.resolveShot();return freeThrows('You are fouled shooting. Two free throws.');}
+    if(mode==='steal'||mode==='failed_steal'||mode==='defence')return defence(undefined,true);
+    if(mode==='defshot'||mode==='defthree')return defensiveShot(undefined,mode==='defthree'?3:2);
+    if(mode==='turnover'||mode==='recovery')return recovery();
+    if(mode==='dead'){e.deadBall();return show('The ball is knocked out. Magic keep possession.',[['Inbound the ball',()=>{e.restart();return normal('Magic complete the inbound.');}]],'dead_ball');}
+    if(mode==='half'||mode==='final'){
+      for(let i=0;i<40;i++)tick(30,'qa_setup');e.boundary();
+      if(mode==='half')return terminal();
+      e.resume();for(let i=0;i<39;i++)tick(30,'qa_setup');anchor=28;return route();
+    }
+    throw Error('Unknown fixture '+mode);
+  }
+  if(fixture)enter(fixture);else show('The crowd is getting loud. The opening tip is about to happen.',[['START GAME 1',start]],'opening');
+  return {view:()=>structuredClone(screen),state,trace:()=>e.trace(),
+    act(index,expectedRevision=revision){if(expectedRevision!==revision||!Number.isInteger(index)||!actions[index])throw Error('Stale or invalid control');return actions[index]();}};
+}
+
+const FIXTURES={normal:[.2],ball_hand:[.2],shots:[.1],made:[.1],miss:[.99],block:[.47],foul:[.55],
+  offreb:[.99,.01],defreb:[.99,.01],opponent_rebound:[.99,.99],teammate_rebound:[.99,.3],
+  defence:[.99],steal:[.01],failed_steal:[.99],defshot:[.99],defthree:[.01],ft:[.55,.01,.99],
+  turnover:[.01],recovery:[.99],dead:[],half:[],late:[.01],final:[]};
+
+const params=new URLSearchParams(location.search),testing=params.get('qa')==='1';
+const labels={normal:'Normal 3-choice',ball_hand:'Ball in hand',shots:'All 4 shots',made:'Made shot',miss:'Missed shot',block:'Blocked shot',foul:'Shooting foul',offreb:'Offensive rebound',defreb:'Defensive rebound',opponent_rebound:'Opponent offensive rebound',teammate_rebound:'Teammate rebound',defence:'Defensive decision',steal:'Guaranteed steal',failed_steal:'Failed steal / recovery',defshot:'Defensive shot',defthree:'Opponent three-point attempt',ft:'Free throws',turnover:'Turnover / transition',recovery:'Failure / recovery',dead:'Dead-ball restart',half:'Halftime',late:'Late pressure',final:'Final possession'};
+const q=id=>document.getElementById(id);let game=createGame(),history=[];
+function render(){
+  const v=game.view(),x=v.state;
+  for(const [id,value] of Object.entries({m:x.score.Magic,f:x.score.Falcons,h:x.ended?'FINAL':x.phase==='halftime'?'HALFTIME':x.half===1?'1ST HALF':'2ND HALF',c:fmt(x.clock),ball:x.ended?'game over':x.phase==='halftime'?'halftime':x.phase==='free_throw'?x.team+' free throw':x.phase==='rebound'?'loose — rebound':x.phase==='dead_ball'?'dead — '+x.team+' inbound':x.phase==='between'?'dead — '+x.nextTeam+' next':x.team===null?'dead':x.team==='Magic'?'with your team':'with the Falcons',p:x.pressure,fat:x.fatigue,pid:x.pos?possessionId(x.pos):'—',d:x.decisions,s:x.shots,r:x.rebounds,pts:x.points,st:x.stops,to:x.turnovers}))q(id).textContent=value;
+  q('scene').textContent=v.text;q('choices').replaceChildren();
+  v.choices.forEach((text,index)=>{const b=document.createElement('button');b.className='choice';b.textContent=text;b.onclick=()=>{game.act(index,v.revision);render();};q('choices').appendChild(b);});
+  history.push({time:fmt(x.clock),half:x.half,pos:x.pos,text:v.text});
+  q('history').replaceChildren();history.slice(-150).reverse().forEach(h=>{const p=document.createElement('p');p.textContent='H'+h.half+' '+h.time+' · '+possessionId(h.pos)+' · '+h.text;q('history').appendChild(p);});
+  if(testing){q('state').textContent=JSON.stringify(x,null,2);q('trace').textContent=JSON.stringify(game.trace());}
+}
+if(testing){
+  document.body.classList.add('testing');
+  Object.entries(FIXTURES).forEach(([fixture,rolls])=>{const b=document.createElement('button');b.className='choice';b.textContent=labels[fixture];b.onclick=()=>{game=createGame({fixture,rolls});history=[];render();};q('fixtures').appendChild(b);});
+  const reset=document.createElement('button');reset.className='choice orange';reset.textContent='Reset full game';reset.onclick=()=>{game=createGame();history=[];render();};q('fixtures').appendChild(reset);
+  for(const [label,seed] of [['Highly involved',1],['Cautious',2718],['Brave but unlucky',18],['Early mistake and recovery',6],['Late close game',1],['Low-scoring highly involved',18]]){const b=document.createElement('button');b.className='choice orange';b.textContent='Full route: '+label;b.onclick=()=>{game=createGame({seed});history=[];render();};q('fixtures').appendChild(b);}
+}
+q('contract').onclick=()=>{const r=runContracts();q('qa').textContent=r.filter(t=>t.pass).length+'/'+r.length+' PASS\n'+r.map(t=>(t.pass?'PASS':'FAIL')+' '+t.name+(t.error?' '+t.error:'')).join('\n');};
+render();
+</script></body></html>

@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import './prepare-entry.mjs';
+const read=p=>fs.readFileSync(new URL(p,import.meta.url),'utf8');
+const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+if(hash(fs.readFileSync(new URL('../dist/game-1.html',import.meta.url)))!=='edaa7a7c093889713c7c38feca9b8f20e145c1acafaf3c0fda8365743ba9ff72')throw Error('Canonical bundle changed');
+const config={engine:['../src/engine.mjs',''],content:['../src/content.mjs',''],game:['./slice-game.mjs','const {createEngine,possessionId}=modules.engine;const {NORMAL,SHOTS,REBOUNDS,DEFENCE,DEF_SHOTS,RECOVERY,BALL_HAND,SPINE,fmt,shotText,reboundText,freeThrowText}=modules.content;'],director:['./director.mjs','const {createGame}=modules.game;'],court:['./court.mjs',''],ui:['./ui.mjs','const {createSlice,optionsFrom,SCENARIOS}=modules.director;const {courtModel,courtShell,ROSTER}=modules.court;']};
+const scripts=Object.entries(config).map(([name,[path,imports]])=>{const src=read(path),names=[...src.matchAll(/^export (?:const|function) (\w+)/gm)].map(m=>m[1]);return `modules.${name}=(()=>{${imports}\n${src.replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'')}\nreturn {${names.join(',')}};})();`;}).join('\n');
+const html=`<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Charlotte’s Basketball World — North Star Preview</title><style>${read('./style.css')}</style></head><body><div id="world"></div><script>const modules={};${scripts.replace(/<\/script/gi,'<\\/script')}</script></body></html>`;
+fs.writeFileSync(new URL('./index.html',import.meta.url),html);console.log('v2 bundle '+hash(html));

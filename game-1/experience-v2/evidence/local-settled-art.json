@@ -1,0 +1,16 @@
+[
+  {
+    "loaded": true,
+    "src": "assets/rebound.png",
+    "stage": "secured"
+  },
+  {
+    "loaded": true,
+    "src": "assets/contest.png",
+    "stage": "made"
+  },
+  {
+    "loaded": true,
+    "src": "assets/charlotte.png"
+  }
+]

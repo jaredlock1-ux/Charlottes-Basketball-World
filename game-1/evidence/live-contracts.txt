@@ -1,0 +1,12 @@
+11/11 PASS
+PASS Locked choices
+PASS Explicit opening tip at 20:00 and 0–0
+PASS Opponent scoring persists after transition
+PASS Magic offensive rebound retains ID
+PASS Falcons offensive rebound retains ID
+PASS Rebound action does not select winner
+PASS Free throws individually score; final miss stays live
+PASS Steal records opponent turnover
+PASS Clock rejects giant jumps
+PASS Halftime and final only after full clock
+PASS No actions after final whistle

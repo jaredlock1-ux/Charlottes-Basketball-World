@@ -1,0 +1,3 @@
+import http from 'node:http';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+const root=path.dirname(fileURLToPath(import.meta.url));
+http.createServer((req,res)=>{const p=new URL(req.url,'http://localhost').pathname;const file=p.startsWith('/assets/')?path.join(root,'assets',path.basename(p)):path.join(root,'index.html');try{res.setHeader('Content-Type',file.endsWith('.png')?'image/png':'text/html; charset=utf-8');res.end(fs.readFileSync(file));}catch{res.writeHead(404);res.end('Missing asset');}}).listen(4174,'127.0.0.1',()=>console.log('v2 on http://127.0.0.1:4174'));
