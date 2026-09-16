@@ -1,0 +1,57 @@
+[
+  {
+    "file": "Charlotte's Basketball World — Defect & Change Log.md",
+    "sha256": "fd414b6ebe0dd711922ff704d818ba61a789c981ffc700a62bc71c51cebf0d11",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Development Bible.md",
+    "sha256": "4b268c6d8446c09a1b872f751222d55e1493f09baa967731d0a8aed4327f9dd3",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Engine & Content Contracts v1.0.md",
+    "sha256": "58591b25e8a2aaf18e5961b91afa89f7a331efd7af57c90589f807455929ac73",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Game 1 Acceptance & Certification Specification.md",
+    "sha256": "d334d356c4cd9a06042b2a33c007da3a539c14e53ab2c52c689a3b406da30886",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Game 1 Complete Possession Tree v1.0.md",
+    "sha256": "e5bcf44a5cf6057624ebb38470702051d8b3f74ff03f029884112ac04236c4e3",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Game 1 Golden Game & Possession Engine Specification v2.1.md",
+    "sha256": "2bdf552d3c147425d4fba134e31393d21a7d0f7b82c6c765dde33fbf237b3db2",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Game 1 QA & Architecture Notes v1.0.md",
+    "sha256": "58591b25e8a2aaf18e5961b91afa89f7a331efd7af57c90589f807455929ac73",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Game 1 Story & Experience Specification.md",
+    "sha256": "77f853be7ad1e916557d9ba0e916db42be0529c7b2e5b39e5a06d53d764eb7fc",
+    "verified": true
+  },
+  {
+    "file": "Charlotte's Basketball World — Platform Architecture v1.0.md",
+    "sha256": "341781ddf72da6782162d611d7fe8a8702b9802947a1427f9e887f323e31e753",
+    "verified": true
+  },
+  {
+    "file": "Game 1 Playable Possession Map v1.0.md",
+    "sha256": "cc222dd11d84d9ffa4e71edf9ee4e0d631d1bb90a0a8caa14c0875c7e0f4241b",
+    "verified": true
+  },
+  {
+    "file": "Master Game Specification.md",
+    "sha256": "b4fd8a3afc98672251ef11be80b73c5d2d5add9181d782194a8a24a63141ef70",
+    "verified": true
+  }
+]

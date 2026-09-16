@@ -1,0 +1,423 @@
+{
+  "routes": [
+    {
+      "name": "live-choice-1",
+      "clicks": 5,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-choice-2",
+      "clicks": 4,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-choice-3",
+      "clicks": 5,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-clean",
+      "clicks": 4,
+      "score": [
+        "0",
+        "2"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "not reconstructed: ordinary random seed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/contest.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-desktop-mixed",
+      "clicks": 5,
+      "score": [
+        "2",
+        "2"
+      ],
+      "widths": [
+        1365,
+        1350
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/contest.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-desktop-primary",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1350,
+        1365
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-narrow-mixed",
+      "clicks": 5,
+      "score": [
+        "2",
+        "2"
+      ],
+      "widths": [
+        375,
+        390
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/contest.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-narrow-primary",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        375,
+        390
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-shot-1",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-shot-2",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "live-shot-3",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "failed: hosted assets missing (live-asset-check.json)"
+    },
+    {
+      "name": "local-choice-1",
+      "clicks": 5,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    },
+    {
+      "name": "local-choice-2",
+      "clicks": 4,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    },
+    {
+      "name": "local-choice-3",
+      "clicks": 5,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    },
+    {
+      "name": "local-narrow-mixed-r2",
+      "clicks": 5,
+      "score": [
+        "2",
+        "2"
+      ],
+      "widths": [
+        390,
+        375
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/contest.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    },
+    {
+      "name": "local-narrow-primary-r2",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        375,
+        390
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    },
+    {
+      "name": "local-shot-1",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    },
+    {
+      "name": "local-shot-2",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": true,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    },
+    {
+      "name": "local-shot-3",
+      "clicks": 6,
+      "score": [
+        "2",
+        "0"
+      ],
+      "widths": [
+        1265
+      ],
+      "complete": true,
+      "parity": "passed",
+      "initialArtSamples": [
+        {
+          "loaded": false,
+          "src": "assets/rebound.png"
+        }
+      ],
+      "artAcceptance": "passed in settled local checks and viewport screenshots (local-settled-art.json)"
+    }
+  ],
+  "controls": {
+    "defence": [
+      "Cut off the drive",
+      "Protect the basket",
+      "Stay in front"
+    ],
+    "intent": [
+      "Jump for the block",
+      "Prepare to rebound",
+      "Hand up — contest"
+    ],
+    "rebound": [
+      "Get back to defend",
+      "Stay ready",
+      "Go for the ball"
+    ],
+    "offence": [
+      "Find open space",
+      "Keep moving",
+      "Call for the ball"
+    ],
+    "ballhand": [
+      "Pass to Mia",
+      "Hold and look",
+      "Drive to the basket"
+    ],
+    "shoot": [
+      "Fake, then layup",
+      "Drive for a layup",
+      "Take the shot",
+      "Step aside and shoot"
+    ]
+  }
+}

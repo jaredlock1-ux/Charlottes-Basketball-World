@@ -1,0 +1,106 @@
+{
+  "carryoVersion": 33,
+  "sha256": "edaa7a7c093889713c7c38feca9b8f20e145c1acafaf3c0fda8365743ba9ff72",
+  "routes": [
+    {
+      "name": "live-default",
+      "seed": 1,
+      "clicks": 272,
+      "score": {
+        "Magic": 49,
+        "Falcons": 49
+      },
+      "decisions": 18,
+      "shots": 6,
+      "points": 5,
+      "rebounds": {
+        "you": 10,
+        "opponent": 31,
+        "teammate": 23
+      },
+      "stops": 1,
+      "recovery": 1,
+      "askedForBall": 3,
+      "lateScore": {
+        "Magic": 45,
+        "Falcons": 46
+      },
+      "pass": true
+    },
+    {
+      "name": "live-cautious",
+      "seed": 2718,
+      "clicks": 268,
+      "score": {
+        "Magic": 46,
+        "Falcons": 54
+      },
+      "decisions": 17,
+      "shots": 4,
+      "points": 0,
+      "rebounds": {
+        "opponent": 30,
+        "teammate": 22,
+        "you": 9
+      },
+      "stops": 1,
+      "recovery": 1,
+      "askedForBall": 0,
+      "lateScore": {
+        "Magic": 43,
+        "Falcons": 52
+      },
+      "pass": true
+    },
+    {
+      "name": "live-unlucky",
+      "seed": 18,
+      "clicks": 288,
+      "score": {
+        "Magic": 46,
+        "Falcons": 52
+      },
+      "decisions": 18,
+      "shots": 4,
+      "points": 2,
+      "rebounds": {
+        "you": 11,
+        "teammate": 23,
+        "opponent": 30
+      },
+      "stops": 1,
+      "recovery": 1,
+      "askedForBall": 3,
+      "lateScore": {
+        "Magic": 44,
+        "Falcons": 52
+      },
+      "pass": true
+    },
+    {
+      "name": "live-recovery",
+      "seed": 6,
+      "clicks": 264,
+      "score": {
+        "Magic": 45,
+        "Falcons": 43
+      },
+      "decisions": 18,
+      "shots": 3,
+      "points": 4,
+      "rebounds": {
+        "opponent": 27,
+        "teammate": 18,
+        "you": 14
+      },
+      "stops": 1,
+      "recovery": 1,
+      "askedForBall": 2,
+      "lateScore": {
+        "Magic": 43,
+        "Falcons": 41
+      },
+      "pass": true
+    }
+  ]
+}

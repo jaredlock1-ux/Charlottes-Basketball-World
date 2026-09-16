@@ -1,0 +1,17 @@
+[
+  {
+    "bundle": "migration-prepared/game-1/dist/game-1.html",
+    "sha256": "EDAA7A7C093889713C7C38FECA9B8F20E145C1ACAFAF3C0FDA8365743BA9FF72",
+    "identical": true
+  },
+  {
+    "bundle": "migration-prepared/game-1/experience-v2/index.html",
+    "sha256": "46F5C03DE42960D9883D82B5FE8F1CF71536573E2D00B59F75D7C2C9024896B5",
+    "identical": true
+  },
+  {
+    "bundle": "migration-prepared/game-1/dist/experience.html",
+    "sha256": "012BB5B4DD521545D79ED77EDA756BD8CAB885F4692BF49069834E76E76EE1E8",
+    "identical": true
+  }
+]
