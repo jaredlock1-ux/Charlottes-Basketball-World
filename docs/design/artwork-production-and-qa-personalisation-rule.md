@@ -4,7 +4,7 @@
 
 ## Core rule
 
-Create narrative illustrations as reusable, identity-neutral basketball scene assets. Never bake a particular child's name, club identity, opponent identity, dynamic story copy or game-state value into a reusable image. Render personalisation and event text from the live game UI using authoritative profile and engine state. Charlotte's game must remain fully personalised through that UI without requiring a separate illustration for each child.
+Create narrative illustrations as reusable, identity-neutral basketball scene assets. Never bake a particular child's name, club identity, opponent identity, dynamic story copy or game-state value into a reusable image. Render personalisation and event text from the live game UI using authoritative profile and engine state. Charlotte's game must remain personalised through that UI without requiring a separate illustration for each child.
 
 ## Prohibited embedded content in reusable art
 
@@ -40,9 +40,9 @@ Test the same integrated scene with at least two different child names and two d
 
 ---
 
-# Artwork workflow and change control v1.0 — consolidated operational rules
+# Artwork workflow and change control v1.1 — consolidated operational rules
 
-**Approved by Jared:** 17 September 2026. This section is the canonical operational workflow for artwork discussion, generation, review and handoff. It complements the identity and dynamic-state requirements above, rather than duplicating them in additional governance documents. The existing `docs/design/Game-1-Visual-Coverage-Matrix-v1.0.md` remains the coverage record; it is not evidence that newly discussed art has been uploaded or integrated.
+**Approved by Jared:** 17 September 2026. This is the canonical operational workflow. It complements the identity and dynamic-state requirements above. The existing `docs/design/Game-1-Visual-Coverage-Matrix-v1.0.md` remains the coverage record; neither that matrix nor a chat approval proves an image was uploaded or integrated.
 
 ## 1. Intent and authorisation gate
 
@@ -63,6 +63,7 @@ Write a one-objective change brief: what changes, what is frozen, game-state map
 - Intended change is singular and specific; approved elements to preserve are stated.
 - Basketball facts, scene stage and engine/event mapping are defined without spoilers.
 - Personalisation and dynamic-state requirements above are included.
+- For any scene depicting Charlotte, an **actual approved and accessible character master** is selected and cited in the brief, with its exact version/path or usable image. A written description, web-search illustration or latest generated variant cannot substitute for the master. If no definitive master has been selected and verified, STOP and select it with Jared before generating character-sensitive revisions.
 
 If any item is unresolved, discuss or clarify in text. Never call image generation as a substitute for answering a question.
 
@@ -74,18 +75,26 @@ Generate one correctly scoped asset at a time unless a batch was explicitly appr
 
 **Artwork truth:** consistent approved character/style and protected composition; image-only neutral art; no baked-in child/team identity, incompatible jersey numbers, text, logos, score, clock or period. Inspect background signage, uniforms, floor and scoreboards, not just foreground. Mark PASS/FAIL/NOT TESTED and list defects candidly. Attractive art does not override basketball or identity defects. An explicit user acceptance of visible imperfections records a limited visual exception, not automatic release clearance for hard game-state contradictions.
 
-If the same defect persists across two attempts, STOP repeating near-identical prompts. Change method (e.g. supply a verified court diagram, isolate the edit, use a spatial reference) and seek authorisation for the revised method if scope changes.
+**Character identity gate:** compare the result directly against the selected approved master, not memory or a prose prompt. Check face structure, eye size/shape/spacing, hair colour/texture/ponytail, headband, apparent age, head-to-body ratio, height/build and uniform design. Recurring teammates/opponents require their own verified references when consistency is claimed. Scene composition approval and character approval are independent; BOTH must pass for final approval. If a character looks different, FAIL even if the scene is attractive. Do not invent unapproved front/side/three-quarter views and call them reference truth.
 
-## 6. Approval and status integrity
+**Change-preservation gate:** inspect source and revision side by side. Record (a) whether the requested change occurred, (b) whether every frozen element stayed unchanged, and (c) unintended differences in character identity, action, ball, rim/net, camera, geometry, lighting, roster, branding or state. A targeted image edit is preferred to wholesale regeneration, but editing is not pixel-perfect and still requires this comparison. Any material unintended change is FAIL, not an automatic new baseline.
 
-Only Jared approves artwork. Assistant QA may recommend but must not label its own recommendation as Jared's approval. Maintain unique asset ID, exact version/source reference or repository path, event mapping, status, accepted exceptions and review evidence in the artwork register. Distinguish: proposed → generated/revision required → user-approved (possibly with accepted imperfections) → stored in GitHub → integrated → tested/certified. Rejected variants cannot be selected for release. Do not claim a chat-generated image is in GitHub, Carryo or the live game until verified. Protected originals remain unchanged unless separately authorised.
+If the same defect persists across two attempts, STOP repeating near-identical prompts. Change method (verified spatial/character reference, isolated edit or controlled compositing); obtain authorisation if scope changes. Do not use a rejected variant as the source for another attempt.
+
+## 6. Approval, references and status integrity
+
+Only Jared approves artwork. Assistant QA may recommend but must not label its own recommendation as Jared's approval. Maintain unique asset ID, exact version/source reference or repository path, event mapping, scene-approval status, character-approval status, accepted exceptions and review evidence in the artwork register. Distinguish: proposed → generated/revision required → user-approved (possibly with accepted imperfections) → stored in GitHub → integrated → tested/certified. Rejected variants cannot be selected for release or promoted to a new baseline. Preserve a known-good original, its exact source/path and checksum when available. Do not claim a chat-generated image is in GitHub, Carryo or the live game until verified. Protected originals remain unchanged unless separately authorised.
+
+**Character-reference record:** choose the actual approved Charlotte image with Jared and record its immutable source/version and distinguishing traits; optionally document genuinely approved views. Do not declare a master selected merely because a historical image or filename exists. Maintain similarly approved reference records for recurring characters if used. Character consistency in Charlotte-specific art is distinct from future configurable visual personalisation for other children.
 
 ## 7. Integration, coverage and regression
 
 Keep the coverage matrix mapped to actual event families and shot types; avoid duplicate art and mismatched stage mappings. Before integration, audit the chosen exact file and manifest. Test the correct art for made/missed two-point jump shots, layups and threes, including pre-result suspense; check live score, clock, possession, roster and club variants, responsiveness and text accessibility. Confirm background players do not contradict authoritative state. Integration and live QA are separate from aesthetic approval; no retroactive certification.
 
+Where practical, reuse approved character assets or controlled layers/composites instead of regenerating the same character from scratch for every scene. Do not claim layered assets exist until created and verified. Prove the character-reference and change-preservation process on ONE bounded revision before applying it to the wider art set.
+
 ## 8. Failure feedback and document hygiene
 
-Classify each failure as authorisation, asset selection, scope/change, generation, basketball QA, identity QA, integration or test escape. Fix the responsible checkpoint and demonstrate it works before adding more governance. Consolidate operational changes here; retain the existing dynamic-state rule and visual coverage matrix as separate domain authority/record rather than creating overlapping bibles. The workflow is: Discuss → Identify → Scope → Authorise → Produce → QA → Jared approves → Store/integrate → Test.
+Classify each failure as authorisation, asset selection, scope/change, generation, basketball QA, character identity QA, integration or test escape. Fix the responsible checkpoint and demonstrate it works before adding more governance. Consolidate operational changes here; retain the existing dynamic-state rule and visual coverage matrix as separate domain authority/record rather than creating overlapping bibles. The workflow is: Discuss → Identify → Scope → Authorise → Verify character reference → Produce → Compare/QA → Jared approves → Store/integrate → Test.
 
-**Current scope note (17 September 2026):** Jared's latest request concerns adding believable supporting players to the approved **Made Two-Point Jump Shot** illustration only. Three-point and layup images are outside that edit's scope. This note records intent, not generation authorisation, an asset upload or completion.
+**Current scope note (17 September 2026):** The current character-correction task concerns the user-supplied layup-attempt image showing Charlotte airborne with the ball in hand, multiple players, hardcoded jersey numbers/club text and a static scoreboard. Jared likes its scene composition but rejected the generated character revision because Charlotte no longer matches the established character. Preserve the user-supplied scene as the scene reference; the generated variant is rejected. The separate ball-through-net Made Layup image was approved earlier. The exact definitive Charlotte character master has NOT yet been selected/verified and the controlled correction has NOT been completed. The static scoreboard, numbers and club text remain release-blocking for reusable production artwork and require separately scoped neutral derivatives; scene approval alone does not waive these defects. This note records scope, not permission to generate or evidence of integration.
